@@ -1,53 +1,47 @@
-#!/usr/bin/env nextflow
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    boydgreenfield/nextflow-template-test
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/boydgreenfield/nextflow-template-test
-----------------------------------------------------------------------------------------
-*/
+process generateOut1 {
+    output:
+    path 'result*', emit: res
+    path '*.json', emit: json
 
-nextflow.enable.dsl = 2
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    VALIDATE & PRINT PARAMETER SUMMARY
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-WorkflowMain.initialize(workflow, params, log)
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    NAMED WORKFLOW FOR PIPELINE
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-include { NEXTFLOW_TEMPLATE_TEST } from './workflows/nextflow_template_test'
-
-//
-// WORKFLOW: Run main boydgreenfield/nextflow-template-test analysis pipeline
-//
-workflow NFCORE_NEXTFLOW_TEMPLATE_TEST {
-    NEXTFLOW_TEMPLATE_TEST ()
+    """
+    sleep 60
+    echo '{"message": "This is my output"}' >> result.json
+    """
 }
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    RUN ALL WORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
+process generateOut2 {
+    input:
+    val inp
 
-//
-// WORKFLOW: Execute a single named workflow for the pipeline
-// See: https://github.com/nf-core/rnaseq/issues/619
-//
+    output:
+    path '*.txt', emit: txt
+
+    """
+    sleep 60
+    date > date.txt
+    echo "${inp}" > date.txt
+    """
+}
+
+
+process generateOut3 {
+    input:
+    val str
+
+    output:
+    path 'final.txt', emit: last
+
+    """
+    sleep 60
+    echo "That's the last output, ${str}" > final.txt
+    """
+}
+
 workflow {
-    NFCORE_NEXTFLOW_TEMPLATE_TEST ()
+    generateOut1()
+    generateOut1.out.res.view { "Output from 1 (${it.name}): ${it.text}" }
+    generateOut2(generateOut1.out.res)
+    generateOut2.out.txt.view { "Output from 2 (${it.name}): ${it.text}" }
+    generateOut3(generateOut2.out.txt)
+    generateOut3.out.last.view { "Output from 3 (${it.name}): ${it.text}" }
 }
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    THE END
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
