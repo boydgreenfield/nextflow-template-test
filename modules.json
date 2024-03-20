@@ -1,0 +1,11 @@
+{
+    "name": "boydgreenfield/nextflow-template-test",
+    "homePage": "https://github.com/boydgreenfield/nextflow-template-test",
+    "repos": {
+        "https://github.com/nf-core/modules.git": {
+            "modules": {
+                "nf-core": {}
+            }
+        }
+    }
+}
